@@ -1,0 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Bạn có thể đổi thành mysql, sqlite,... tùy nhu cầu
+  url      = env("DATABASE_URL")
+}
+
+// Định nghĩa model ví dụ:
+// model User {
+//   id    Int     @id @default(autoincrement())
+//   email String  @unique
+//   name  String?
+// }
