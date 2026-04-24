@@ -20,10 +20,8 @@ export class UsersService {
   async getUsers() {
     try {
       const result = await this.usersRepository.findAll();
-      console.log('[DEBUG] getUsers result:', result);
       return result;
     } catch (err) {
-      console.error('[DEBUG] getUsers ERROR:', err);
       throw err;
     }
   }
