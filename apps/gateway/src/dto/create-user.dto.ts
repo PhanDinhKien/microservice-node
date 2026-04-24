@@ -10,6 +10,9 @@ export class CreateUserDto {
   @ApiProperty({ example: '0912345678', description: 'Số điện thoại', maxLength: 20 })
   phone_number: string;
 
+  @ApiProperty({ example: 'password123', description: 'Mật khẩu', minLength: 6 })
+  password: string;
+
   @ApiPropertyOptional({ example: '123 Đường ABC, TP.HCM', description: 'Địa chỉ', maxLength: 500 })
   address?: string;
 
