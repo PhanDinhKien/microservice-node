@@ -42,6 +42,9 @@ model User {
 
   /// Quan hệ với bảng roles
   user_roles       UserRole[]
+  
+  /// Quan hệ với bảng refresh_tokens
+  refresh_tokens   RefreshToken[]
 
   @@map("users")
 }
@@ -147,4 +150,54 @@ model RolePermission {
 
   @@id([role_id, permission_id])
   @@map("role_permissions")
+}
+
+model RefreshToken {
+  /// Primary key dạng UUID
+  id           String   @id @default(uuid()) @db.Uuid
+  
+  /// Mã token thực tế
+  token        String   @unique @db.VarChar(500)
+  
+  /// ID người dùng sở hữu token
+  user_id      String   @db.Uuid
+  
+  /// Thời điểm hết hạn của token
+  expires_at   DateTime
+  
+  /// Đánh dấu token đã bị thu hồi
+  is_revoked   Boolean  @default(false)
+  
+  /// Địa chỉ IP khi khởi tạo token
+  ip_address   String?  @db.VarChar(50)
+  
+  /// Thông tin thiết bị/trình duyệt
+  user_agent   String?  @db.VarChar(500)
+
+  /// Thời điểm tạo bản ghi
+  created_at   DateTime @default(now())
+  
+  /// Thời điểm cập nhật cuối cùng
+  updated_at   DateTime @updatedAt
+
+  /// Quan hệ với model User
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model BlacklistedToken {
+  /// Primary key dạng UUID
+  id           String   @id @default(uuid()) @db.Uuid
+  
+  /// Mã token (hoặc JTI) bị đưa vào danh sách đen
+  token        String   @unique @db.VarChar(500)
+  
+  /// Thời điểm token này hết hạn (dùng để cleanup database sau này)
+  expires_at   DateTime
+
+  /// Thời điểm đưa vào danh sách đen
+  created_at   DateTime @default(now())
+
+  @@map("blacklisted_tokens")
 }
