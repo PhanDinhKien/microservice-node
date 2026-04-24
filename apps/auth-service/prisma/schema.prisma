@@ -3,13 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Bạn có thể đổi thành mysql, sqlite,... tùy nhu cầu
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 // Định nghĩa model ví dụ:
-// model User {
-//   id    Int     @id @default(autoincrement())
-//   email String  @unique
-//   name  String?
-// }
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String   @unique
+  phoneNumber String
+  address     String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("users")
+}
