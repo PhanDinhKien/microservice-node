@@ -92,3 +92,36 @@ model UserRole {
   @@id([user_id, role_id])
   @@map("user_roles")
 }
+
+
+model Permission {
+  /// ID quyền 
+  id String @id @default(uuid())
+  /// Key kỹ thuật: action:resource (vd: create:user)
+  permission_key String @unique @db.VarChar(250)
+  /// Tên hiển thị đa ngôn ngữ { "vi": "...", "en": "..." }
+  name Json
+  /// Mô tả đa ngôn ngữ { "vi": "...", "en": "..." }
+  description Json?
+
+  /// dùng cho service nào (vd: auth-service, payment-service)
+  service_code String @db.VarChar(100)
+
+  /// hành động (vd: READ, WRITE, DELETE, UPDATE)
+  action String @db.VarChar(100)
+
+  /// dùng để phân quyền (vd: ALL, OWN, GROUP, DEPARTMENT, CUSTOMER)
+  scope String @db.VarChar(50)
+
+  /// trạng thái active = true , inactive = false
+  is_active Boolean @default(true)
+
+  /// Thời điểm tạo bản ghi
+  created_at DateTime @default(now())
+  /// Thời điểm cập nhật bản ghi lần cuối
+  updated_at DateTime @updatedAt
+  /// Thời điểm xoá mềm
+  deleted_at DateTime?  
+
+  @@map("permissions")
+}
