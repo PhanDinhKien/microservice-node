@@ -4,9 +4,9 @@ import { ConfigService } from '@nestjs/config';
 import { UsersController } from './controllers/users.controller';
 import { UsersService } from './services/users.service';
 import { UsersRepository } from './repositories/users.repository';
-import { RefreshTokensRepository } from './repositories/refresh-tokens.repository';
-import { AuthController } from './controllers/auth.controller';
-import { AuthService } from './services/auth.service';
+import { RefreshTokensRepository } from '../auth/repositories/refresh-tokens.repository';
+import { AuthController } from '../auth/controllers/auth.controller';
+import { AuthService } from '../auth/services/auth.service';
 
 @Module({
   imports: [

@@ -2,9 +2,9 @@ import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/co
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RegisterDto } from "../dto/auth/register.dto";
-import { LoginDto } from "../dto/auth/login.dto";
-import { UsersRepository } from "../repositories/users.repository";
+import { RegisterDto } from "../dto/register.dto";
+import { LoginDto } from "../dto/login.dto";
+import { UsersRepository } from "../../users/repositories/users.repository";
 import { RefreshTokensRepository } from "../repositories/refresh-tokens.repository";
 
 @Injectable() 
