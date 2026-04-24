@@ -15,5 +15,5 @@ export class UsersController {
   @MessagePattern({ cmd: 'get_users' })
   getUsers() {
     return this.usersService.getUsers();
-  }
+  }  
 }

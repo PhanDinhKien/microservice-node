@@ -6,19 +6,204 @@ datasource db {
   provider = "postgresql"
 }
 
-// Định nghĩa model ví dụ:
 model User {
-  id               Int       @id @default(autoincrement())
-  email            String    @unique @db.VarChar(255)
-  name             String    @unique @db.VarChar(100)
-  phone_number     String    @db.VarChar(20)
-  address          String?   @db.VarChar(500)
-  avatar           String?   @db.VarChar(500)
-  status           String    @default("active") @db.VarChar(20)
-  password_hash    String    @db.VarChar(255)
-  created_at       DateTime  @default(now())
-  updated_at       DateTime  @updatedAt
-  deleted_at       DateTime?
+  /// Primary key, UUID tự động sinh
+  id                   String     @id @default(uuid()) @db.Uuid
+
+  /// Email đăng nhập, duy nhất trong hệ thống
+  email                String     @unique @db.VarChar(255)
+
+  /// Tên hiển thị người dùng
+  name                 String     @unique @db.VarChar(100)
+
+  /// Số điện thoại liên hệ
+  phone_number         String     @db.VarChar(20)
+
+  /// Địa chỉ (tuỳ chọn)
+  address              String?    @db.VarChar(500)
+
+  /// Đường dẫn ảnh đại diện (tuỳ chọn)
+  avatar               String?    @db.VarChar(500)
+
+  /// Trạng thái tài khoản: active | inactive | banned
+  status               String     @default("active") @db.VarChar(20)
+
+  /// Mật khẩu đã được hash (bcrypt)
+  password_hash        String     @db.VarChar(255)
+
+  /// Version của token, tăng lên để vô hiệu hóa toàn bộ token cũ của user
+  token_version        Int        @default(0)
+
+  /// Thời điểm cuối cùng thay đổi mật khẩu
+  last_password_change DateTime?
+
+  /// Thời điểm tạo bản ghi
+  created_at           DateTime   @default(now())
+
+  /// Thời điểm cập nhật bản ghi lần cuối
+  updated_at           DateTime   @updatedAt
+
+  /// Thời điểm xoá mềm (null = chưa xoá)
+  deleted_at           DateTime?
+
+  /// Quan hệ với bảng roles
+  user_roles           UserRole[]
+  
+  /// Quan hệ với bảng refresh_tokens
+  refresh_tokens       RefreshToken[]
 
   @@map("users")
+}
+
+model Role {
+  /// Primary key, UUID tự động sinh
+  id           String    @id @default(uuid()) @db.Uuid
+
+  /// Tên kỹ thuật của role (vd: admin, editor)
+  role_name    String    @unique @db.VarChar(100)
+
+  /// Tên hiển thị đa ngôn ngữ { "vi": "...", "en": "..." }
+  display_name Json
+
+  /// Mô tả đa ngôn ngữ { "vi": "...", "en": "..." }
+  description  Json?
+
+  /// Role mặc định cho user mới
+  is_default   Boolean   @default(false)
+
+  /// Role hệ thống không được xoá
+  is_system    Boolean   @default(false)
+
+  /// Thời điểm tạo bản ghi
+  created_at   DateTime  @default(now())
+
+  /// Thời điểm cập nhật bản ghi lần cuối
+  updated_at   DateTime  @updatedAt
+
+  /// Thời điểm xoá mềm
+  deleted_at   DateTime?
+
+  /// Quan hệ với bảng users
+  user_roles       UserRole[]
+  
+  /// Quan hệ với bảng permissions
+  role_permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  /// ID người dùng
+  user_id String @db.Uuid
+  /// ID role
+  role_id String @db.Uuid
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, role_id])
+  @@map("user_roles")
+}
+
+model Permission {
+  /// ID quyền 
+  id String @id @default(uuid()) @db.Uuid
+  
+  /// Key kỹ thuật: action:resource (vd: create:user)
+  permission_key String @unique @db.VarChar(250)
+  
+  /// Tên hiển thị đa ngôn ngữ { "vi": "...", "en": "..." }
+  name Json
+  
+  /// Mô tả đa ngôn ngữ { "vi": "...", "en": "..." }
+  description Json?
+
+  /// dùng cho service nào (vd: auth-service, payment-service)
+  service_code String @db.VarChar(100)
+
+  /// hành động (vd: READ, WRITE, DELETE, UPDATE)
+  action String @db.VarChar(100)
+
+  /// dùng để phân quyền (vd: ALL, OWN, GROUP, DEPARTMENT, CUSTOMER)
+  scope String @db.VarChar(50)
+
+  /// trạng thái active = true , inactive = false
+  is_active Boolean @default(true)
+
+  /// Thời điểm tạo bản ghi
+  created_at DateTime @default(now())
+  
+  /// Thời điểm cập nhật bản ghi lần cuối
+  updated_at DateTime @updatedAt
+  
+  /// Thời điểm xoá mềm
+  deleted_at DateTime?  
+
+  /// Quan hệ với bảng roles
+  role_permissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  /// ID role
+  role_id String @db.Uuid
+  /// ID quyền
+  permission_id String @db.Uuid
+
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  @@id([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model RefreshToken {
+  /// Primary key dạng UUID
+  id           String   @id @default(uuid()) @db.Uuid
+  
+  /// Mã token thực tế
+  token        String   @unique @db.VarChar(500)
+  
+  /// ID người dùng sở hữu token
+  user_id      String   @db.Uuid
+  
+  /// Thời điểm hết hạn của token
+  expires_at   DateTime
+  
+  /// Đánh dấu token đã bị thu hồi
+  is_revoked   Boolean  @default(false)
+  
+  /// Địa chỉ IP khi khởi tạo token
+  ip_address   String?  @db.VarChar(50)
+  
+  /// Thông tin thiết bị/trình duyệt
+  user_agent   String?  @db.VarChar(500)
+
+  /// Thời điểm tạo bản ghi
+  created_at   DateTime @default(now())
+  
+  /// Thời điểm cập nhật cuối cùng
+  updated_at   DateTime @updatedAt
+
+  /// Quan hệ với model User
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model BlacklistedToken {
+  /// Primary key dạng UUID
+  id           String   @id @default(uuid()) @db.Uuid
+  
+  /// Mã token (hoặc JTI) bị đưa vào danh sách đen
+  token        String   @unique @db.VarChar(500)
+  
+  /// Thời điểm token này hết hạn (dùng để cleanup database sau này)
+  expires_at   DateTime
+
+  /// Thời điểm đưa vào danh sách đen
+  created_at   DateTime @default(now())
+
+  @@map("blacklisted_tokens")
 }
