@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Inject, HttpException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { RegisterDto } from '../../dto/auth/register.dto';
 import { LoginDto } from '../../dto/auth/login.dto';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
@@ -33,6 +33,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Đăng xuất' })
   async logout(@Body() data: { refresh_token: string }) {
     return firstValueFrom(
@@ -43,6 +44,7 @@ export class AuthController {
   }
 
   @Post('refresh-token')
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Lấy access token mới' })
   async refreshToken(@Body() data: { refresh_token: string }) {
     return firstValueFrom(

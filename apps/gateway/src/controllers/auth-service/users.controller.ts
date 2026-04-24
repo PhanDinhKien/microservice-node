@@ -1,10 +1,11 @@
 import { Controller, Get, Post, Body, Inject, HttpException } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from '../../dto/create-user.dto';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
 
 @ApiTags('Users')
+@ApiBearerAuth('JWT-auth')
 @Controller('users')
 export class UsersController {
   constructor(
