@@ -26,12 +26,9 @@ export class PermissionsGuard implements CanActivate {
 
     const userPermissions: string[] = user.permissions;
 
-    // Admin bypass: Nếu có quyền 'all:all' thì cho qua tất cả
-    if (userPermissions.includes('all:all')) {
+    if (userPermissions.includes('all:all')) { 
       return true;
     }
-
-    // Kiểm tra xem user có chứa TẤT CẢ các quyền yêu cầu không
     const hasPermission = requiredPermissions.every((permission) =>
       userPermissions.includes(permission),
     );
